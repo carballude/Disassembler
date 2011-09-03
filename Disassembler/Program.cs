@@ -92,7 +92,7 @@ namespace Disassembler
             {
                 Console.WriteLine(type);
                 foreach (var constructor in GetConstructors(type))
-                    Console.WriteLine("\t"+(constructor.Attributes.ToString().Contains("Public")?"Public":"NonPublic")+" "+constructor.Name);
+                    Console.WriteLine("\t" + (constructor.Attributes.ToString().Contains("Public") ? "Public" : "NonPublic") + " " + constructor.Name);
                 GetPublicMethods(type).ToList().ForEach(x => Console.WriteLine("\tPublic " + x));
                 GetNonPublicMethods(type).ToList().ForEach(x => Console.WriteLine("\tNonPublic " + x));
                 GetStaticPublicMethods(type).ToList().ForEach(x => Console.WriteLine("\tStatic Public " + x));
@@ -112,47 +112,33 @@ namespace Disassembler
 
         private IEnumerable<MethodInfo> GetStaticPublicMethods(Type type)
         {
-            MethodInfo[] selectedMethods;
-            selectedMethods= type.GetMethods(BindingFlags.Static | BindingFlags.Public);
-            return from method in selectedMethods
-                   where (onlyMethods == null ? true : onlyMethods.Any(x => x == method.Name))
-                   && (matching ? method.Name.ToLower().Contains(match) : true)
-                   orderby method.Name ascending
-                   select method;
+            return GetMethods(type, BindingFlags.Static | BindingFlags.Public);
         }
 
         private IEnumerable<MethodInfo> GetStaticNonPublicMethods(Type type)
         {
-            MethodInfo[] selectedMethods;
-            selectedMethods = type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic);
-            return from method in selectedMethods
-                   where (onlyMethods == null ? true : onlyMethods.Any(x => x == method.Name))
-                   && (matching ? method.Name.ToLower().Contains(match) : true)
-                   orderby method.Name ascending
-                   select method;
+            return GetMethods(type, BindingFlags.Static | BindingFlags.NonPublic);
         }
 
         private IEnumerable<MethodInfo> GetPublicMethods(Type type)
         {
-            MethodInfo[] selectedMethods;
             if (declaredOnly)
-                selectedMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                return GetMethods(type, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             else
-                selectedMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            return from method in selectedMethods
-                   where (onlyMethods == null ? true : onlyMethods.Any(x => x == method.Name))
-                   && (matching ? method.Name.ToLower().Contains(match) : true)
-                   orderby method.Name ascending
-                   select method;
+                return GetMethods(type, BindingFlags.Public | BindingFlags.Instance);
         }
 
         private IEnumerable<MethodInfo> GetNonPublicMethods(Type type)
         {
-            MethodInfo[] selectedMethods;
-            if (declaredOnly)
-                selectedMethods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            if(declaredOnly)
+                return GetMethods(type, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             else
-                selectedMethods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance);
+                return GetMethods(type, BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
+        private IEnumerable<MethodInfo> GetMethods(Type type, BindingFlags flags)
+        {
+            MethodInfo[] selectedMethods = type.GetMethods(flags);
             return from method in selectedMethods
                    where (onlyMethods == null ? true : onlyMethods.Any(x => x == method.Name))
                    && (matching ? method.Name.ToLower().Contains(match) : true)
